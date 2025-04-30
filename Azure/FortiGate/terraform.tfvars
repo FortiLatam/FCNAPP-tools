@@ -1,0 +1,11 @@
+resource_group_name = "fgallego-fcnapp-2"
+location            = "East US 2"
+key_vault_name      = "fcnapp-kv-2"
+secret_lwapi        = "12345"
+secret_xlw          = "12345"
+role_name           = "fcnapp-fgt-role-2"
+identity_name       = "fcnapp-fgt-id-2"
+function_app_name   = "fcnapp-fgt-fapp-2"
+ip_allow_list       = ["12.12.12.12/32", "32.32.32.32/32"]
+azure_subscription_id = "c92e9a69-8a7b-4285-8347-1e6b85bcb014"
+tag_name            = "fcnappmalware"
