@@ -106,8 +106,11 @@ provider "azurerm" {
     location            = var.location
     resource_group_name = var.resource_group_name
   
-    sku_name = "Y1"
+    sku_name = "FC1"
     os_type  = "Linux"
+    
+    per_site_scaling_enabled = false
+    maximum_elastic_worker_count = 1
 
   }
   
