@@ -136,7 +136,11 @@ resource "azurerm_linux_function_app" "fcnapp_function" {
 
   storage_account_name       = azurerm_storage_account.fcnapp_storage.name
   storage_account_access_key = azurerm_storage_account.fcnapp_storage.primary_access_key
-
+  app_settings = {
+    FUNCTIONS_WORKER_RUNTIME = "python"
+    WEBSITE_RUN_FROM_PACKAGE = azurerm_storage_blob.function_zip.url
+    RUNTIME_VERSION          = "python|3.11"
+  }
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.fcnapp_id.id]
