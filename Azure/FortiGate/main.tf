@@ -125,21 +125,24 @@ provider "azurerm" {
     storage_account_name   = azurerm_storage_account.fcnapp_storage.name
     storage_container_name = azurerm_storage_container.function_code.name
     type                   = "Block"
-    source                 = "./function/httptrigger/function_package.zip"
+    source                 = "./function/function_package.zip"
   }
 
-resource "azurerm_linux_function_app" "fcnapp_function" {
+
+resource "azurerm_function_app_flex_consumption" "fcnapp_function" {
   name                = var.function_app_name
   location            = var.location
   resource_group_name = var.resource_group_name
   service_plan_id     = azurerm_service_plan.fcnapp_plan.id
 
-  storage_account_name       = azurerm_storage_account.fcnapp_storage.name
-  storage_account_access_key = azurerm_storage_account.fcnapp_storage.primary_access_key
-  identity {
-    type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.fcnapp_id.id]
-  }
+  storage_container_type      = "blobContainer"
+  storage_container_endpoint  = "${azurerm_storage_account.fcnapp_storage.primary_blob_endpoint}${azurerm_storage_container.function_code.name}"
+  storage_authentication_type = "StorageAccountConnectionString"
+  storage_access_key          = azurerm_storage_account.fcnapp_storage.primary_access_key
+  runtime_name                = "python"
+  runtime_version             = "3.11"
+  maximum_instance_count      = 2
+  instance_memory_in_mb       = 2048
 
   site_config {
     ip_restriction {
@@ -227,22 +230,4 @@ resource "azurerm_linux_function_app" "fcnapp_function" {
       priority   = 240
     }
   }
-    app_settings = {
-      FUNCTIONS_WORKER_RUNTIME    = "python"
-      WEBSITE_RUN_FROM_PACKAGE    = azurerm_storage_blob.function_zip.url
-      AZURE_SUBSCRIPTION_ID       = var.azure_subscription_id
-      TAG_NAME               = var.tag_name
-      RUNTIME_VERSION          = "python|3.11"
-    }
-  
-    function_app_config {
-      runtime_version  = "python|3.11" # Match the runtime version in app_settings
-      app_command_line = ""           # Optional, specify if needed
-      entry_point      = ""           # Optional, specify if needed
-  }
-
-  }
-  
-  
-  
-  
+}
