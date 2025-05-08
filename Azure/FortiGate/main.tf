@@ -127,111 +127,120 @@ provider "azurerm" {
     type                   = "Block"
     source                 = "./function/httptrigger/function_package.zip"
   }
-  
-  resource "azurerm_function_app" "fcnapp_function" {
-    name                       = var.function_app_name
-    location                   = var.location
-    resource_group_name        = var.resource_group_name
-    app_service_plan_id        = azurerm_service_plan.fcnapp_plan.id
-    storage_account_name       = azurerm_storage_account.fcnapp_storage.name
-    storage_account_access_key = azurerm_storage_account.fcnapp_storage.primary_access_key
-    identity {
-      type         = "UserAssigned"
-      identity_ids = [azurerm_user_assigned_identity.fcnapp_id.id]
-    }  
-    site_config {
-        ip_restriction {
-            ip_address = "34.208.85.38/32"
-            action     = "Allow"
-            priority   = 110
-            name       = "LW1"
-          }
-        ip_restriction {
-            ip_address = "35.165.121.10/32"
-            action     = "Allow"
-            priority   = 120
-            name       = "LW2"
-          }
-        ip_restriction {
-            ip_address = "35.165.62.149/32"
-            action     = "Allow"
-            priority   = 130
-            name       = "LW3"
-          }
-        ip_restriction {
-            ip_address = "35.165.83.150/32"
-            action     = "Allow"
-            priority   = 140
-            name       = "LW4"
-          }
-        ip_restriction {
-            ip_address = "35.166.181.157/32"
-            action     = "Allow"
-            priority   = 150
-            name       = "L25"
-          }
-        ip_restriction {
-            ip_address = "35.93.121.192/26"
-            action     = "Allow"
-            priority   = 160
-            name       = "LW6"
-          }
-        ip_restriction {
-            ip_address = "44.231.201.69/32"
-            action     = "Allow"
-            priority   = 170
-            name       = "LW7"
-          }
-        ip_restriction {
-            ip_address = "52.42.23.33/32"
-            action     = "Allow"
-            priority   = 180
-            name       = "LW8"
-          }
-        ip_restriction {
-            ip_address = "52.43.197.121/32"
-            action     = "Allow"
-            priority   = 190
-            name       = "LW9"
-          }
-        ip_restriction {
-            ip_address = "52.88.113.199/32"
-            action     = "Allow"
-            priority   = 200
-            name       = "LW10"
-          }
-        ip_restriction {
-            ip_address = "54.200.230.179/32"
-            action     = "Allow"
-            priority   = 210
-            name       = "LW11"
-          }
-        ip_restriction {
-            ip_address = "54.203.18.248/32"
-            action     = "Allow"
-            priority   = 220
-            name       = "LW12"
-          }
-        ip_restriction {
-            ip_address = "54.213.7.200/32"
-            action     = "Allow"
-            priority   = 230
-            name       = "LW13"
-          }
-      ip_restriction {
-          action     = "Deny"
-          priority   = 200
-          name       = "DenyAll"
-          ip_address = "0.0.0.0/0"
-        }
-      }
-  
+
+resource "azurerm_linux_function_app" "fcnapp_function" {
+  name                = var.function_app_name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  service_plan_id     = azurerm_service_plan.fcnapp_plan.id
+
+  storage_account_name       = azurerm_storage_account.fcnapp_storage.name
+  storage_account_access_key = azurerm_storage_account.fcnapp_storage.primary_access_key
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.fcnapp_id.id]
+  }
+
+  site_config {
+    ip_restriction {
+      name       = "LW1"
+      ip_address = "34.208.85.38/32"
+      action     = "Allow"
+      priority   = 110
+    }
+    ip_restriction {
+      name       = "LW2"
+      ip_address = "35.165.121.10/32"
+      action     = "Allow"
+      priority   = 120
+    }
+    ip_restriction {
+      name       = "LW3"
+      ip_address = "35.165.62.149/32"
+      action     = "Allow"
+      priority   = 130
+    }
+    ip_restriction {
+      name       = "LW4"
+      ip_address = "35.165.83.150/32"
+      action     = "Allow"
+      priority   = 140
+    }
+    ip_restriction {
+      name       = "L25"
+      ip_address = "35.166.181.157/32"
+      action     = "Allow"
+      priority   = 150
+    }
+    ip_restriction {
+      name       = "LW6"
+      ip_address = "35.93.121.192/26"
+      action     = "Allow"
+      priority   = 160
+    }
+    ip_restriction {
+      name       = "LW7"
+      ip_address = "44.231.201.69/32"
+      action     = "Allow"
+      priority   = 170
+    }
+    ip_restriction {
+      name       = "LW8"
+      ip_address = "52.42.23.33/32"
+      action     = "Allow"
+      priority   = 180
+    }
+    ip_restriction {
+      name       = "LW9"
+      ip_address = "52.43.197.121/32"
+      action     = "Allow"
+      priority   = 190
+    }
+    ip_restriction {
+      name       = "LW10"
+      ip_address = "52.88.113.199/32"
+      action     = "Allow"
+      priority   = 200
+    }
+    ip_restriction {
+      name       = "LW11"
+      ip_address = "54.200.230.179/32"
+      action     = "Allow"
+      priority   = 210
+    }
+    ip_restriction {
+      name       = "LW12"
+      ip_address = "54.203.18.248/32"
+      action     = "Allow"
+      priority   = 220
+    }
+    ip_restriction {
+      name       = "LW13"
+      ip_address = "54.213.7.200/32"
+      action     = "Allow"
+      priority   = 230
+    }
+    ip_restriction {
+      name       = "DenyAll"
+      ip_address = "0.0.0.0/0"
+      action     = "Deny"
+      priority   = 240
+    }
+  }
     app_settings = {
       FUNCTIONS_WORKER_RUNTIME    = "python"
       WEBSITE_RUN_FROM_PACKAGE    = azurerm_storage_blob.function_zip.url
       AZURE_SUBSCRIPTION_ID       = var.azure_subscription_id
       TAG_NAME               = var.tag_name
+      RUNTIME_VERSION          = "python|3.11"
     }
+  
+    function_app_config {
+      runtime_version  = "python|3.11" # Match the runtime version in app_settings
+      app_command_line = ""           # Optional, specify if needed
+      entry_point      = ""           # Optional, specify if needed
+  }
+
   }
   
   
