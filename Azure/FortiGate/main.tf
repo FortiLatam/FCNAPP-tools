@@ -141,7 +141,7 @@ resource "azurerm_function_app_flex_consumption" "fcnapp_function" {
   storage_access_key          = azurerm_storage_account.fcnapp_storage.primary_access_key
   runtime_name                = "python"
   runtime_version             = "3.11"
-  maximum_instance_count      = 2
+  maximum_instance_count      = 40
   instance_memory_in_mb       = 2048
 
   site_config {
