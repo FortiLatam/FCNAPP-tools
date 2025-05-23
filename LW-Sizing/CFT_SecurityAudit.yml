@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creates a new role with SecurityAudit permissions that can be assumed by a role from IAM Identity Center
+
+Parameters:
+  TrustedPrincipalArn: 
+    Type: String
+    Description: Role ARN that can assume the new role
+
+Resources:
+  SecurityAuditAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: SecurityAuditAccessRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Ref TrustedPrincipalArn
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/SecurityAudit
+      Description: Role with audit permissions that can be assumed by user in IAM Identity Center
+
+Outputs:
+  RoleArn:
+    Description: Role's ARN created
+    Value: !GetAtt SecurityAuditAccessRole.Arn
