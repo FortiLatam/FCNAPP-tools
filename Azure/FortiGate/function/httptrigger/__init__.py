@@ -174,8 +174,7 @@ def add_tag_to_vm(urn_instance_id):
     """
     logger.info(f"Starting to add the tag to VM {urn_instance_id}...")
 
-git config --global user.email "fabiogallego@gmail.com"
-  git config --global user.name "FG"
+
     try:
         
                      
