@@ -10,15 +10,15 @@ from azure.mgmt.resource.resources.models import TagsResource
 from azure.keyvault.secrets import SecretClient
 ##import azure.mgmt.resource as ResourceManagementClient
 
-# Configuração do logger
+# Logger configuration
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# Nome do segredo no Azure Key Vault
+# Azure Key Vault
 KEY_VAULT_NAME = "fgallego-kv1"
 SECRET_NAME = "lwapi-secrets"
 
-# URL para obter o Bearer Token
+# URL to get the Bearer Token
 AUTH_URL = "https://partner-demo.lacework.net/api/v2/access/tokens"
 CLIENT_ID = os.environ["AZURE_CLIENT_ID"]
 
@@ -26,14 +26,14 @@ credential = DefaultAzureCredential(managed_identity_client_id=CLIENT_ID)
 
 subscription_id = os.environ["AZURE_SUBSCRIPTION_ID"]
 resource_client = ResourceManagementClient(credential, subscription_id)
-# Cliente do Azure Key Vault
+# Azure Key Vault client
 key_vault_uri = f"https://{KEY_VAULT_NAME}.vault.azure.net"
 secret_client = SecretClient(vault_url=key_vault_uri, credential=credential)
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
-        # Parse do payload recebido
+        # Payload parsing
         body = req.get_json()
         event_id = body.get("event_id")
         
@@ -44,19 +44,19 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 mimetype="application/json"
             )
 
-        # Log do event_id
+        # event_id logging
         logger.info(f"Extracted event_id: {event_id}")
 
-        # Obter credenciais do Azure Key Vault
+        # getting credentials from Azure Key Vault
         key_id = get_secret("lwapi-secrets")
         uaks_token = get_secret("x-lw-uaks")
         logger.info("Successfully retrieved credentials from Key Vault.")
 
-        # Obter o Bearer Token
+        # getting Bearer Token
         token = get_bearer_token(key_id, uaks_token)
         logger.info("Successfully obtained Bearer Token.")
 
-        # Monta o body para a chamada externa
+        # Create the body for the external API call
         external_api_body = {
             "filters": [{"expression": "eq", "field": "id", "value": event_id}],
             "returns": ["srcEvent"]
@@ -64,7 +64,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         external_api_url = "https://partner-demo.lacework.net/api/v2/Events/search"
         logger.info(f"Calling event search URL... {external_api_body}")
 
-        # Chamada para a API externa com o Bearer Token
+        # External API call with Bearer Token
         response = requests.post(
             external_api_url,
             json=external_api_body,
@@ -75,11 +75,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
         response.raise_for_status()
 
-        # Parse da resposta da API externa
+        # Parse the response from the external API
         data = response.json()
         instance_id = data["data"][0]["srcEvent"]["machine_tags"]["InstanceId"]
 
-        # Log do InstanceId
+        # Log from InstanceId
         logger.info(f"Extracted InstanceId: {instance_id}")
 
         ## Search for urn
@@ -92,7 +92,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         inventory_api_url = "https://partner-demo.lacework.net/api/v2/Inventory/search"
         logger.info(f"Calling inventory search URL with body: {inventory_api_body}")
 
-        # Chamada para a API externa com o Bearer Token
+        # External API call
         response_inv = requests.post(
             inventory_api_url,
             json=inventory_api_body,
@@ -105,17 +105,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         logger.info(f"Response content: {response_inv.content}")
         response_inv.raise_for_status()
 
-        # Parse da resposta da API externa
+        # Parse the response from the inventory API
         data = response_inv.json()
         urn_instance_id = data["data"][0]["urn"]
 
 
         ## End URN search
 
-        # Adiciona a tag "malware=true" (caso use VM no Azure)
+        # Add the tag "malware=true" to the VM
         add_tag_to_vm(urn_instance_id)
 
-        # Resposta de sucesso
+        # Success response
         return func.HttpResponse(
             json.dumps({"InstanceId": urn_instance_id, "message": "Tag added successfully"}),
             status_code=200,
@@ -134,7 +134,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
 def get_bearer_token(key_id, uaks_token):
     """
-    Obtém o Bearer Token a partir do endpoint de autenticação.
+    Get Bearer Token from Lacework API using the provided info.
     """
     try:
         response = requests.post(
@@ -156,7 +156,7 @@ def get_bearer_token(key_id, uaks_token):
 
 def get_secret(secret_name):
     """
-    Recupera o segredo do Azure Key Vault.
+    Get a secret from Azure Key Vault.
     """
     try:
         secret = secret_client.get_secret(secret_name)
@@ -170,21 +170,22 @@ def get_secret(secret_name):
 
 def add_tag_to_vm(urn_instance_id):
     """
-    Função para adicionar a tag "malware=true" a uma VM no Azure.
+    Function to add a tag "malware=true" to the VM identified by its URN.
     """
     logger.info(f"Starting to add the tag to VM {urn_instance_id}...")
 
-
+git config --global user.email "fabiogallego@gmail.com"
+  git config --global user.name "FG"
     try:
-        # Obtém os detalhes do recurso para preservar tags existentes
+        
                      
         resource = resource_client.resources.get_by_id(urn_instance_id, api_version="2021-04-01")
 
-        # Mantém as tags existentes e adiciona a nova tag
+        # Keep existing tags or create a new dictionary if none exist
         updated_tags = resource.tags or {}
         updated_tags["malware"] = "true"
 
-        # Atualiza as tags do recurso
+        # Update the resource with the new tags
         resource_client.resources.begin_update_by_id(
             urn_instance_id,
             api_version="2021-04-01",
