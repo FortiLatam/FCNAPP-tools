@@ -156,6 +156,7 @@ resource "azurerm_function_app_flex_consumption" "fcnapp_function" {
     AZURE_SUBSCRIPTION_ID   = var.azure_subscription_id
     AZURE_KEYVAULT_NAME     = azurerm_key_vault.fcnapp_kv.name
     FCNAPP_TENANT_NAME      = var.fcnapp_tenant_name
+    TAG_NAME                = var.tag_name
   }
 
   site_config {

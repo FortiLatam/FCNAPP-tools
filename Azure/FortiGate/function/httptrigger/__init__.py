@@ -18,6 +18,7 @@ logger.setLevel(logging.INFO)
 KEY_VAULT_NAME = os.environ["AZURE_KEYVAULT_NAME"]
 SECRET_NAME = "lwapi-secrets"
 FCNAPP_TENANT_NAME = os.environ["FCNAPP_TENANT_NAME"]
+TAG_NAME = os.environ["TAG_NAME"]
 
 # URL to get the Bearer Token
 AUTH_URL = f"https://{FCNAPP_TENANT_NAME}.lacework.net/api/v2/access/tokens"
@@ -186,7 +187,7 @@ def add_tag_to_vm(urn_instance_id):
 
         # Keep existing tags or create a new dictionary if none exist
         updated_tags = resource.tags or {}
-        updated_tags["malware"] = "true"
+        updated_tags[TAG_NAME] = "true"
 
         # Update the resource with the new tags
         resource_client.resources.begin_update_by_id(
@@ -195,7 +196,7 @@ def add_tag_to_vm(urn_instance_id):
             parameters={"tags": updated_tags}
         ).result()
 
-        logger.info(f"Tag 'malware=true' added successfully to {urn_instance_id}")
+        logger.info(f"Tag {TAG_NAME}=true added successfully to {urn_instance_id}")
 
     except Exception as e:
         logger.error(f"Failed to add tag to resource {urn_instance_id}: {str(e)}")
