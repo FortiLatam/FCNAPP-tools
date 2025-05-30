@@ -38,11 +38,6 @@ variable "function_app_name" {
   description = "Function App name"
 }
 
-variable "ip_allow_list" {
-  type        = list(string)
-  description = "Allow IPs list"
-}
-
 variable "azure_subscription_id" {
   type        = string
   description = "Azure subscription id"
@@ -51,4 +46,14 @@ variable "azure_subscription_id" {
 variable "tag_name" {
   type        = string
   description = "Tag Name"
+}
+
+variable "fcnapp_tenant_name" {
+  type        = string
+  description = "Your FortiCNAPP demo. Example: partner-demo if your URL is https://partner-demo.lacework.net/"
+}
+
+variable "storage_account_name" {
+  type        = string
+  description = "Name for Storage Account"
 }

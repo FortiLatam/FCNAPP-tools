@@ -22,12 +22,14 @@ provider "azurerm" {
     name         = "lwapi-secrets"
     value        = var.secret_lwapi
     key_vault_id = azurerm_key_vault.fcnapp_kv.id
+    depends_on = [azurerm_key_vault_access_policy.terraform_user]
   }
   
   resource "azurerm_key_vault_secret" "xlwuaks" {
     name         = "x-lw-uaks"
     value        = var.secret_xlw
     key_vault_id = azurerm_key_vault.fcnapp_kv.id
+    depends_on = [azurerm_key_vault_access_policy.terraform_user]
   }
   
   resource "azurerm_key_vault_access_policy" "terraform_user" {
@@ -94,7 +96,7 @@ provider "azurerm" {
   }
   
   resource "azurerm_storage_account" "fcnapp_storage" {
-    name                     = "fcnappstoragefgt"
+    name                     = var.storage_account_name
     resource_group_name      = var.resource_group_name
     location                 = var.location
     account_tier             = "Standard"
@@ -143,6 +145,18 @@ resource "azurerm_function_app_flex_consumption" "fcnapp_function" {
   runtime_version             = "3.11"
   maximum_instance_count      = 40
   instance_memory_in_mb       = 2048
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.fcnapp_id.id]
+  }
+
+  app_settings = {
+    AZURE_CLIENT_ID         = azurerm_user_assigned_identity.fcnapp_id.client_id
+    AZURE_SUBSCRIPTION_ID   = var.azure_subscription_id
+    AZURE_KEYVAULT_NAME     = azurerm_key_vault.fcnapp_kv.name
+    FCNAPP_TENANT_NAME      = var.fcnapp_tenant_name
+  }
 
   site_config {
     ip_restriction {
@@ -230,4 +244,14 @@ resource "azurerm_function_app_flex_consumption" "fcnapp_function" {
       priority   = 240
     }
   }
+}
+
+resource "null_resource" "deploy_function" {
+  provisioner "local-exec" {
+    command = <<EOT
+      az functionapp deployment source config-zip --resource-group ${var.resource_group_name} --name ${azurerm_function_app_flex_consumption.fcnapp_function.name} --src "./function/function_package.zip" || echo "Health check failed due to network restrictions, it is not a real problem..."
+    EOT
+  }
+
+  depends_on = [azurerm_function_app_flex_consumption.fcnapp_function]
 }

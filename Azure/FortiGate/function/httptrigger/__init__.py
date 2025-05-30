@@ -15,11 +15,12 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # Azure Key Vault
-KEY_VAULT_NAME = "fgallego-kv1"
+KEY_VAULT_NAME = os.environ["AZURE_KEYVAULT_NAME"]
 SECRET_NAME = "lwapi-secrets"
+FCNAPP_TENANT_NAME = os.environ["FCNAPP_TENANT_NAME"]
 
 # URL to get the Bearer Token
-AUTH_URL = "https://partner-demo.lacework.net/api/v2/access/tokens"
+AUTH_URL = f"https://{FCNAPP_TENANT_NAME}.lacework.net/api/v2/access/tokens"
 CLIENT_ID = os.environ["AZURE_CLIENT_ID"]
 
 credential = DefaultAzureCredential(managed_identity_client_id=CLIENT_ID)
@@ -61,7 +62,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             "filters": [{"expression": "eq", "field": "id", "value": event_id}],
             "returns": ["srcEvent"]
         }
-        external_api_url = "https://partner-demo.lacework.net/api/v2/Events/search"
+        external_api_url = f"https://{FCNAPP_TENANT_NAME}.lacework.net/api/v2/Events/search"
         logger.info(f"Calling event search URL... {external_api_body}")
 
         # External API call with Bearer Token
@@ -77,6 +78,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         # Parse the response from the external API
         data = response.json()
+        # Needs improvement: Check for valid data and machine_tags
         instance_id = data["data"][0]["srcEvent"]["machine_tags"]["InstanceId"]
 
         # Log from InstanceId
@@ -89,7 +91,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             "returns": ["urn"],
             "csp": "Azure"
         }
-        inventory_api_url = "https://partner-demo.lacework.net/api/v2/Inventory/search"
+
+        
+        inventory_api_url = f"https://{FCNAPP_TENANT_NAME}.lacework.net/api/v2/Inventory/search"
         logger.info(f"Calling inventory search URL with body: {inventory_api_body}")
 
         # External API call
