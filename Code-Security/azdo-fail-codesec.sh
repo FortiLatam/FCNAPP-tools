@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPORT_FILE="./lacework-scan.json"
+REPORT_FILE="./lacework-scan.sarif"
 
     if [ "$SCA_CRIT" == "fail" ]; then
       SCA_CRIT_VULNS=$(jq '[.runs[].tool.driver.rules[] | select((.properties.tags // []) | index("critical") and index("vulnerability"))] | length' $REPORT_FILE)
