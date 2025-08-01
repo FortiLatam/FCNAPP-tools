@@ -2,7 +2,7 @@
 
 REPORT_FILE="./lacework-scan.json"
 
-    if [ "$(SCA_CRIT)" == "fail" ]; then
+    if [ "$SCA_CRIT" == "fail" ]; then
       SCA_CRIT_VULNS=$(jq '[.runs[].tool.driver.rules[] | select((.properties.tags // []) | index("critical") and index("vulnerability"))] | length' $REPORT_FILE)
       echo "Found $SCA_CRIT_VULNS vulnerabilities CRITICAL."
 
@@ -12,7 +12,7 @@ REPORT_FILE="./lacework-scan.json"
       fi
     fi
 
-    if [ "$(SCA_HIGH)" == "fail" ]; then
+    if [ "$SCA_HIGH" == "fail" ]; then
       SCA_HIGH_VULNS=$(jq '[.runs[].tool.driver.rules[] | select((.properties.tags // []) | index("high") and index("vulnerability"))] | length' $REPORT_FILE)
       echo "Found $SCA_HIGH_VULNS vulnerabilities HIGH."
 
@@ -22,7 +22,7 @@ REPORT_FILE="./lacework-scan.json"
       fi
     fi
 
-    if [ "$(SAST_CRIT)" == "fail" ]; then
+    if [ "$SAST_CRIT" == "fail" ]; then
       SAST_CRIT_VULNS=$(jq '[.runs[].tool.driver.rules[] | select((.properties.tags // []) | index("critical") and index("weakness"))] | length' $REPORT_FILE)
       echo "Found $SAST_CRIT_VULNS weakness CRITICAL."
 
@@ -32,7 +32,7 @@ REPORT_FILE="./lacework-scan.json"
       fi
     fi
 
-    if [ "$(SAST_HIGH)" == "fail" ]; then
+    if [ "$SAST_HIGH" == "fail" ]; then
       SAST_HIGH_VULNS=$(jq '[.runs[].tool.driver.rules[] | select((.properties.tags // []) | index("high") and index("weakness"))] | length' $REPORT_FILE)
       echo "Found $SAST_HIGH_VULNS weakness HIGH."
 
