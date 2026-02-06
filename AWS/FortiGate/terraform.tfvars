@@ -1,0 +1,7 @@
+aws_region = ""
+lambda_zip_file = "lambda_function.zip"
+lambda_function_name = ""
+event_bus_name = ""
+event_rule_name = ""
+lambda_execution_role_name = ""
+tag_key = "fcnappalert"
